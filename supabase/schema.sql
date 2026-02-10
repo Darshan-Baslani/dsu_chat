@@ -15,6 +15,7 @@ create type public.message_type as enum ('text', 'assignment', 'submission');
 
 create table public.profiles (
   id uuid primary key references auth.users (id) on delete cascade,
+  email text unique,
   full_name text not null,
   avatar_url text,
   role public.user_role not null default 'student',
@@ -80,14 +81,16 @@ create index idx_messages_sender_id on public.messages (sender_id);
 create or replace function public.handle_new_user()
 returns trigger
 language plpgsql
-security definer set search_path = ''
+security definer set search_path = 'public'
 as $$
 begin
-  insert into public.profiles (id, full_name, avatar_url)
+  insert into public.profiles (id, email, full_name, avatar_url, role)
   values (
     new.id,
+    new.email,
     coalesce(new.raw_user_meta_data ->> 'full_name', ''),
-    coalesce(new.raw_user_meta_data ->> 'avatar_url', '')
+    coalesce(new.raw_user_meta_data ->> 'avatar_url', ''),
+    coalesce(new.raw_user_meta_data ->> 'role', 'student')::user_role
   );
   return new;
 end;
@@ -125,6 +128,21 @@ alter table public.rooms enable row level security;
 alter table public.room_members enable row level security;
 alter table public.messages enable row level security;
 
+-- Helper: checks room membership without triggering RLS (security definer).
+-- This breaks the infinite recursion that would otherwise happen when
+-- room_members policies reference room_members itself.
+create or replace function public.is_room_member(p_room_id uuid)
+returns boolean
+language sql
+security definer
+set search_path = ''
+as $$
+  select exists (
+    select 1 from public.room_members
+    where room_id = p_room_id and user_id = auth.uid()
+  );
+$$;
+
 -- ---------- profiles ----------
 
 -- Anyone authenticated can read any profile (needed for displaying names/avatars).
@@ -146,12 +164,7 @@ create policy "Users can update their own profile"
 create policy "Members can view their rooms"
   on public.rooms for select
   to authenticated
-  using (
-    id in (
-      select room_id from public.room_members
-      where user_id = auth.uid()
-    )
-  );
+  using ( public.is_room_member(id) );
 
 -- Teachers can create rooms.
 create policy "Teachers can create rooms"
@@ -171,12 +184,7 @@ create policy "Teachers can create rooms"
 create policy "Members can see fellow room members"
   on public.room_members for select
   to authenticated
-  using (
-    room_id in (
-      select room_id from public.room_members
-      where user_id = auth.uid()
-    )
-  );
+  using ( public.is_room_member(room_id) );
 
 -- Teachers can add members to rooms they created.
 create policy "Room creators can add members"
@@ -201,12 +209,7 @@ create policy "Members can leave rooms"
 create policy "Members can read room messages"
   on public.messages for select
   to authenticated
-  using (
-    room_id in (
-      select room_id from public.room_members
-      where user_id = auth.uid()
-    )
-  );
+  using ( public.is_room_member(room_id) );
 
 -- Members can send messages to rooms they belong to.
 create policy "Members can send messages"
@@ -214,15 +217,10 @@ create policy "Members can send messages"
   to authenticated
   with check (
     sender_id = auth.uid()
-    and room_id in (
-      select room_id from public.room_members
-      where user_id = auth.uid()
-    )
+    and public.is_room_member(room_id)
   );
 
 -- In announcement rooms, only teachers can post.
--- This replaces the above insert policy for announcement rooms specifically,
--- so we add a check: if the room type is 'announcement', sender must be a teacher.
 create policy "Only teachers post in announcement rooms"
   on public.messages for insert
   to authenticated

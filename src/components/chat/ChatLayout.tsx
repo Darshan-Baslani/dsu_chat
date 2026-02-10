@@ -1,57 +1,126 @@
 "use client";
 
 import { useState } from "react";
-import { Message } from "@/types/chat";
-import {
-  CURRENT_USER_ID,
-  rooms,
-  messagesByRoom,
-} from "@/lib/mock-data";
+import { useRouter } from "next/navigation";
+import { supabase } from "@/lib/supabase";
+import { useCurrentUser } from "@/hooks/use-current-user";
+import { useRooms } from "@/hooks/use-rooms";
+import { useChat } from "@/hooks/use-chat";
+import { sendMessage } from "@/lib/messages";
+import type { UserRole } from "@/types/chat";
+import { toMessage } from "@/types/chat";
 import RoomList from "./RoomList";
 import ChatHeader from "./ChatHeader";
 import MessageList from "./MessageList";
 import MessageInput from "./MessageInput";
 
 export default function ChatLayout() {
-  const [activeRoomId, setActiveRoomId] = useState(rooms[0].id);
-  const [localMessages, setLocalMessages] = useState<
-    Record<string, Message[]>
-  >(messagesByRoom);
+  const router = useRouter();
+  const { user, loading: userLoading } = useCurrentUser();
+  const { rooms, loading: roomsLoading, refresh: refreshRooms } = useRooms();
+  const [activeRoomId, setActiveRoomId] = useState<string | null>(null);
 
-  const activeRoom = rooms.find((r) => r.id === activeRoomId)!;
-  const messages = localMessages[activeRoomId] ?? [];
+  const effectiveRoomId = activeRoomId ?? rooms[0]?.id ?? "";
+  const { messages, loading: messagesLoading, addMessage } = useChat(effectiveRoomId);
 
-  function handleSend(text: string) {
-    const newMsg: Message = {
-      id: `msg-${Date.now()}`,
-      room_id: activeRoomId,
-      sender_id: CURRENT_USER_ID,
-      sender_name: "You",
-      content: text,
-      message_type: "text",
-      metadata: {},
-      created_at: new Date().toISOString(),
-    };
+  const activeRoom = rooms.find((r) => r.id === effectiveRoomId);
+  const role = (user?.user_metadata?.role as UserRole) ?? "student";
 
-    setLocalMessages((prev) => ({
-      ...prev,
-      [activeRoomId]: [...(prev[activeRoomId] ?? []), newMsg],
-    }));
+  async function handleLogout() {
+    await supabase.auth.signOut();
+    router.push("/login");
+  }
+
+  async function handleSend(text: string) {
+    if (!effectiveRoomId) return;
+    try {
+      const row = await sendMessage(text, effectiveRoomId);
+      if (row) addMessage(toMessage(row));
+    } catch (err) {
+      console.error("Send failed:", err);
+    }
+  }
+
+  async function handleSendAssignment(data: {
+    title: string;
+    description: string;
+    max_score: number;
+    due_date: string;
+  }) {
+    if (!effectiveRoomId) return;
+    try {
+      await sendMessage(
+        `Assignment: ${data.title}`,
+        effectiveRoomId,
+        "assignment",
+        {
+          title: data.title,
+          description: data.description,
+          max_score: data.max_score,
+          due_date: data.due_date,
+        }
+      );
+    } catch (err) {
+      console.error("Assignment send failed:", err);
+    }
+  }
+
+  if (userLoading || roomsLoading) {
+    return (
+      <div className="flex h-screen w-screen items-center justify-center bg-gray-50">
+        <p className="text-gray-500 text-sm">Loading...</p>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="flex h-screen w-screen items-center justify-center bg-gray-50">
+        <p className="text-gray-500 text-sm">
+          Please sign in to access the chat.
+        </p>
+      </div>
+    );
   }
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-gray-50">
       <RoomList
         rooms={rooms}
-        activeRoomId={activeRoomId}
+        activeRoomId={effectiveRoomId}
         onSelectRoom={setActiveRoomId}
+        onLogout={handleLogout}
+        role={role}
+        onRoomCreated={refreshRooms}
       />
 
-      {/* Main chat area */}
       <main className="flex flex-col flex-1 min-w-0">
-        <ChatHeader room={activeRoom} />
-        <MessageList messages={messages} roomType={activeRoom.type} />
-        <MessageInput onSend={handleSend} />
+        {activeRoom ? (
+          <>
+            <ChatHeader room={activeRoom} role={role} />
+            <MessageList
+              messages={messages}
+              roomType={activeRoom.type}
+              currentUserId={user.id}
+              role={role}
+              roomId={effectiveRoomId}
+              loading={messagesLoading}
+            />
+            <MessageInput
+              onSend={handleSend}
+              onSendAssignment={handleSendAssignment}
+              role={role}
+            />
+          </>
+        ) : (
+          <div className="flex-1 flex items-center justify-center bg-[#efeae2]">
+            <p className="text-sm text-gray-500">
+              {role === "teacher"
+                ? "Create a room to get started."
+                : "Waiting for a teacher to add you to a room."}
+            </p>
+          </div>
+        )}
       </main>
     </div>
   );

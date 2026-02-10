@@ -1,13 +1,16 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { Message } from "@/types/chat";
-import { CURRENT_USER_ID } from "@/lib/mock-data";
+import { Message, UserRole } from "@/types/chat";
 import MessageBubble from "./MessageBubble";
 
 interface MessageListProps {
   messages: Message[];
   roomType: "direct" | "group" | "announcement";
+  currentUserId: string;
+  role: UserRole;
+  roomId: string;
+  loading?: boolean;
 }
 
 function dateDivider(iso: string): string {
@@ -26,23 +29,43 @@ function dateDivider(iso: string): string {
   });
 }
 
-export default function MessageList({ messages, roomType }: MessageListProps) {
+export default function MessageList({
+  messages,
+  roomType,
+  currentUserId,
+  role,
+  roomId,
+  loading,
+}: MessageListProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Group messages by date for dividers
   let lastDate = "";
 
   return (
     <div className="flex-1 overflow-y-auto px-6 py-4 space-y-2 bg-[#efeae2]">
+      {loading && messages.length === 0 && (
+        <div className="flex justify-center py-10">
+          <span className="text-sm text-gray-400">Loading messages...</span>
+        </div>
+      )}
+
+      {!loading && messages.length === 0 && (
+        <div className="flex justify-center py-10">
+          <span className="text-sm text-gray-400">
+            No messages yet. Say something!
+          </span>
+        </div>
+      )}
+
       {messages.map((msg) => {
         const msgDate = dateDivider(msg.created_at);
         const showDate = msgDate !== lastDate;
         lastDate = msgDate;
-        const isMine = msg.sender_id === CURRENT_USER_ID;
+        const isMine = msg.sender_id === currentUserId;
         const showSender = roomType !== "direct";
 
         return (
@@ -58,6 +81,8 @@ export default function MessageList({ messages, roomType }: MessageListProps) {
               message={msg}
               isMine={isMine}
               showSender={showSender}
+              role={role}
+              roomId={roomId}
             />
           </div>
         );
