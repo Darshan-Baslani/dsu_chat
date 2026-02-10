@@ -5,8 +5,8 @@
 | Layer    | Technology                  |
 | -------- | --------------------------- |
 | Frontend | Next.js 16 (App Router), TypeScript |
-| Styling  | Tailwind CSS v4             |
-| Backend  | Supabase (Postgres, Auth, Realtime) |
+| Styling  | Tailwind CSS v4 (Emerald/Slate palette) |
+| Backend  | Supabase (Postgres, Auth, Realtime, Storage) |
 | Auth     | Supabase Auth + @supabase/ssr (cookie-based sessions everywhere) |
 | Hosting  | Not yet deployed            |
 
@@ -39,9 +39,9 @@ src/
 │   ├── MessageInput.tsx        # Bottom input bar + "+" button for teachers to create assignments
 │   ├── CreateRoomModal.tsx     # Modal for creating rooms (name, type: group/announcement)
 │   ├── AddMemberModal.tsx      # Modal for adding students to rooms by email lookup
-│   ├── CreateAssignmentModal.tsx # Modal for assignments (title, desc, score, due date)
-│   ├── SubmitAssignmentModal.tsx # Modal for student submissions (link + comments)
-│   └── ClassworkSidebar.tsx     # Slide-in sidebar listing all assignments + submission counts
+│   ├── CreateAssignmentModal.tsx # Modal for assignments (title, desc, score, due date, file upload)
+│   ├── SubmitAssignmentModal.tsx # Modal for student submissions (file upload + link + comments)
+│   └── ClassworkSidebar.tsx     # Slide-in sidebar: assignment list, submission counts, deadline check
 ├── hooks/
 │   ├── use-chat.ts             # useChat(roomId) — fetch messages + Realtime subscription + addMessage
 │   ├── use-rooms.ts            # useRooms() — fetch rooms user belongs to

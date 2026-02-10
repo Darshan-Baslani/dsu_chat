@@ -147,6 +147,7 @@ export default function ChatLayout() {
         messages={messages}
         role={role}
         roomId={effectiveRoomId}
+        roomName={activeRoom?.name ?? ""}
       />
     </div>
   );

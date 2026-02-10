@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { sendMessage } from "@/lib/messages";
 import { Message, UserRole } from "@/types/chat";
 
 interface ClassworkSidebarProps {
@@ -11,6 +10,7 @@ interface ClassworkSidebarProps {
   messages: Message[];
   role: UserRole;
   roomId: string;
+  roomName: string;
 }
 
 export default function ClassworkSidebar({
@@ -19,6 +19,7 @@ export default function ClassworkSidebar({
   messages,
   role,
   roomId,
+  roomName,
 }: ClassworkSidebarProps) {
   const [checking, setChecking] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
@@ -92,7 +93,7 @@ export default function ClassworkSidebar({
         submissionMap.get(refId)!.add(s.sender_id);
       }
 
-      // 4. Find late students and send notifications
+      // 4. Find late students and send private bot notifications
       let notified = 0;
 
       for (const assignment of overdue) {
@@ -105,11 +106,30 @@ export default function ClassworkSidebar({
         for (const student of students) {
           if (submitters.has(student.user_id)) continue;
 
-          await sendMessage(
-            `⚠️ @${student.name}, you missed the deadline for assignment: ${title}. Please submit immediately.`,
-            roomId
-          );
-          notified++;
+          const res = await fetch("/api/bot/notify", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              studentId: student.user_id,
+              studentName: student.name,
+              assignmentTitle: title,
+              roomName,
+            }),
+          });
+
+          if (!res.ok) {
+            const text = await res.text();
+            let detail: string;
+            try {
+              detail = JSON.parse(text).error ?? text;
+            } catch {
+              detail = text;
+            }
+            console.error("Bot notify failed:", res.status, detail);
+            throw new Error(detail || `Bot API returned ${res.status}`);
+          } else {
+            notified++;
+          }
         }
       }
 
