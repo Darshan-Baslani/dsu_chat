@@ -84,36 +84,41 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#efeae2] px-4">
+    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
       <div className="w-full max-w-md">
         {/* Header */}
-        <div className="mb-6 text-center">
-          <h1 className="text-2xl font-bold text-gray-900">Chat LMS</h1>
-          <p className="text-sm text-gray-500 mt-1">
+        <div className="mb-8 text-center">
+          <div className="w-14 h-14 rounded-2xl bg-emerald-600 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-600/20">
+            <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2} className="w-7 h-7">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            </svg>
+          </div>
+          <h1 className="text-2xl font-bold text-slate-900">Chat LMS</h1>
+          <p className="text-sm text-slate-500 mt-1">
             Your classroom, in a chat
           </p>
         </div>
 
         {/* Card */}
-        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
           {/* Tabs */}
-          <div className="flex border-b border-gray-200">
+          <div className="flex border-b border-slate-200">
             <button
               onClick={() => { setTab("login"); setError(null); }}
-              className={`flex-1 py-3 text-sm font-medium transition-colors ${
+              className={`flex-1 py-3.5 text-sm font-medium transition-colors ${
                 tab === "login"
-                  ? "text-green-700 border-b-2 border-green-600"
-                  : "text-gray-500 hover:text-gray-700"
+                  ? "text-emerald-700 border-b-2 border-emerald-600"
+                  : "text-slate-400 hover:text-slate-600"
               }`}
             >
               Login
             </button>
             <button
               onClick={() => { setTab("signup"); setError(null); }}
-              className={`flex-1 py-3 text-sm font-medium transition-colors ${
+              className={`flex-1 py-3.5 text-sm font-medium transition-colors ${
                 tab === "signup"
-                  ? "text-green-700 border-b-2 border-green-600"
-                  : "text-gray-500 hover:text-gray-700"
+                  ? "text-emerald-700 border-b-2 border-emerald-600"
+                  : "text-slate-400 hover:text-slate-600"
               }`}
             >
               Sign Up
@@ -130,7 +135,7 @@ export default function LoginPage() {
               <>
                 {/* Full Name */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
                     Full Name
                   </label>
                   <input
@@ -139,23 +144,23 @@ export default function LoginPage() {
                     onChange={(e) => setFullName(e.target.value)}
                     placeholder="Jane Doe"
                     required
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
+                    className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-slate-700 placeholder:text-slate-400"
                   />
                 </div>
 
                 {/* Role */}
                 <fieldset>
-                  <legend className="block text-sm font-medium text-gray-700 mb-2">
-                    I am a…
+                  <legend className="block text-sm font-medium text-slate-700 mb-2">
+                    I am a...
                   </legend>
-                  <div className="flex gap-4">
+                  <div className="flex gap-3">
                     {(["student", "teacher"] as const).map((r) => (
                       <label
                         key={r}
-                        className={`flex-1 flex items-center justify-center gap-2 rounded-lg border-2 py-2.5 px-3 text-sm font-medium cursor-pointer transition-colors ${
+                        className={`flex-1 flex items-center justify-center gap-2 rounded-xl border-2 py-2.5 px-3 text-sm font-medium cursor-pointer transition-all ${
                           role === r
-                            ? "border-green-600 bg-green-50 text-green-700"
-                            : "border-gray-200 text-gray-600 hover:border-gray-300"
+                            ? "border-emerald-600 bg-emerald-50 text-emerald-700 shadow-sm"
+                            : "border-slate-200 text-slate-500 hover:border-slate-300"
                         }`}
                       >
                         <input
@@ -176,7 +181,7 @@ export default function LoginPage() {
 
             {/* Email */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">
                 Email
               </label>
               <input
@@ -185,13 +190,13 @@ export default function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
                 required
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
+                className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-slate-700 placeholder:text-slate-400"
               />
             </div>
 
             {/* Password */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">
                 Password
               </label>
               <input
@@ -201,13 +206,13 @@ export default function LoginPage() {
                 placeholder="••••••••"
                 required
                 minLength={6}
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
+                className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-slate-700 placeholder:text-slate-400"
               />
             </div>
 
             {/* Error */}
             {error && (
-              <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">
+              <p className="text-sm text-red-600 bg-red-50 rounded-xl px-3.5 py-2.5">
                 {error}
               </p>
             )}
@@ -216,7 +221,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-lg bg-green-600 py-2.5 text-sm font-medium text-white hover:bg-green-700 transition-colors disabled:opacity-50"
+              className="w-full rounded-xl bg-emerald-600 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 transition-colors disabled:opacity-50 shadow-sm"
             >
               {loading
                 ? "Please wait..."

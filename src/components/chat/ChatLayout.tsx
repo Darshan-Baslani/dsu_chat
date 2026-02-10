@@ -71,16 +71,19 @@ export default function ChatLayout() {
 
   if (userLoading || roomsLoading) {
     return (
-      <div className="flex h-screen w-screen items-center justify-center bg-gray-50">
-        <p className="text-gray-500 text-sm">Loading...</p>
+      <div className="flex h-screen w-screen items-center justify-center bg-slate-50">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin" />
+          <p className="text-slate-400 text-sm">Loading...</p>
+        </div>
       </div>
     );
   }
 
   if (!user) {
     return (
-      <div className="flex h-screen w-screen items-center justify-center bg-gray-50">
-        <p className="text-gray-500 text-sm">
+      <div className="flex h-screen w-screen items-center justify-center bg-slate-50">
+        <p className="text-slate-400 text-sm">
           Please sign in to access the chat.
         </p>
       </div>
@@ -88,7 +91,7 @@ export default function ChatLayout() {
   }
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-gray-50">
+    <div className="flex h-screen w-screen overflow-hidden bg-slate-100">
       <RoomList
         rooms={rooms}
         activeRoomId={effectiveRoomId}
@@ -121,12 +124,19 @@ export default function ChatLayout() {
             />
           </>
         ) : (
-          <div className="flex-1 flex items-center justify-center bg-[#efeae2]">
-            <p className="text-sm text-gray-500">
-              {role === "teacher"
-                ? "Create a room to get started."
-                : "Waiting for a teacher to add you to a room."}
-            </p>
+          <div className="flex-1 flex items-center justify-center bg-slate-50">
+            <div className="text-center">
+              <div className="w-16 h-16 rounded-2xl bg-emerald-50 flex items-center justify-center mx-auto mb-4">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-8 h-8 text-emerald-600">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                </svg>
+              </div>
+              <p className="text-sm font-medium text-slate-500">
+                {role === "teacher"
+                  ? "Create a room to get started."
+                  : "Waiting for a teacher to add you to a room."}
+              </p>
+            </div>
           </div>
         )}
       </main>

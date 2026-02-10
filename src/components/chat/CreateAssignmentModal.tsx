@@ -110,17 +110,17 @@ export default function CreateAssignmentModal({
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4"
+        className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 border border-slate-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200">
-          <h2 className="text-base font-semibold text-gray-900">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200">
+          <h2 className="text-base font-semibold text-slate-900">
             Create Assignment
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-slate-400 hover:text-slate-600 transition-colors"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-5 h-5">
               <path d="M18 6L6 18M6 6l12 12" />
@@ -132,7 +132,7 @@ export default function CreateAssignmentModal({
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
           {/* Title */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-slate-700 mb-1">
               Title
             </label>
             <input
@@ -142,13 +142,13 @@ export default function CreateAssignmentModal({
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. Implement a Binary Search Tree"
               required
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
+              className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-slate-700 placeholder:text-slate-400"
             />
           </div>
 
           {/* Description */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-slate-700 mb-1">
               Description
             </label>
             <textarea
@@ -156,49 +156,64 @@ export default function CreateAssignmentModal({
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Assignment details, requirements, resources..."
               rows={3}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500 resize-none"
+              className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-slate-700 placeholder:text-slate-400 resize-none"
             />
           </div>
 
-          {/* Max Score + Due Date (side by side) */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Max Score
-              </label>
+          {/* Max Score */}
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              Max Score
+            </label>
+            <input
+              type="number"
+              min={1}
+              value={maxScore}
+              onChange={(e) => setMaxScore(Number(e.target.value))}
+              required
+              className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-slate-700"
+            />
+          </div>
+
+          {/* Due Date + Time */}
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              Due Date & Time
+            </label>
+            <div className="grid grid-cols-2 gap-3">
               <input
-                type="number"
-                min={1}
-                value={maxScore}
-                onChange={(e) => setMaxScore(Number(e.target.value))}
+                type="date"
+                value={dueDate.split("T")[0] || ""}
+                onChange={(e) => {
+                  const time = dueDate.split("T")[1] || "23:59";
+                  setDueDate(`${e.target.value}T${time}`);
+                }}
                 required
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
+                className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-slate-700"
               />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Due Date
-              </label>
               <input
-                type="datetime-local"
-                value={dueDate}
-                onChange={(e) => setDueDate(e.target.value)}
+                type="time"
+                value={dueDate.split("T")[1] || ""}
+                onChange={(e) => {
+                  const date = dueDate.split("T")[0] || "";
+                  setDueDate(`${date}T${e.target.value}`);
+                }}
                 required
-                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500"
+                className="w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 text-slate-700"
               />
             </div>
           </div>
 
           {/* File Attachment */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Attachment <span className="text-gray-400 font-normal">(optional)</span>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              Attachment <span className="text-slate-400 font-normal">(optional)</span>
             </label>
-            <label className="flex items-center gap-2 w-full rounded-lg border border-dashed border-gray-300 px-3 py-2.5 text-sm cursor-pointer hover:border-green-400 hover:bg-green-50/50 transition-colors">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4 text-gray-400 shrink-0">
+            <label className="flex items-center gap-2 w-full rounded-xl border border-dashed border-slate-300 px-3.5 py-2.5 text-sm cursor-pointer hover:border-emerald-400 hover:bg-emerald-50/50 transition-colors">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4 text-slate-400 shrink-0">
                 <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
               </svg>
-              <span className="truncate text-gray-500">
+              <span className="truncate text-slate-500">
                 {file ? file.name : "Choose a file..."}
               </span>
               <input
@@ -220,7 +235,7 @@ export default function CreateAssignmentModal({
 
           {/* Error */}
           {error && (
-            <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">
+            <p className="text-sm text-red-600 bg-red-50 rounded-xl px-3.5 py-2.5">
               {error}
             </p>
           )}
@@ -230,14 +245,14 @@ export default function CreateAssignmentModal({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors"
+              className="px-4 py-2.5 text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={!title.trim() || !dueDate || uploading}
-              className="px-5 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-40"
+              className="px-5 py-2.5 text-sm font-medium text-white bg-emerald-600 rounded-xl hover:bg-emerald-700 transition-colors disabled:opacity-40 shadow-sm"
             >
               {uploading ? "Uploading..." : "Post"}
             </button>

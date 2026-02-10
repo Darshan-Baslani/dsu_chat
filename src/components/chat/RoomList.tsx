@@ -42,15 +42,22 @@ export default function RoomList({
 
   return (
     <>
-      <aside className="w-[360px] shrink-0 flex flex-col border-r border-gray-200 bg-white">
+      <aside className="w-[340px] shrink-0 flex flex-col border-r border-slate-200 bg-slate-50/50">
         {/* Header */}
-        <div className="h-14 flex items-center justify-between px-4 bg-gray-100 border-b border-gray-200">
-          <h1 className="text-lg font-semibold text-gray-800">Chats</h1>
+        <div className="h-16 flex items-center justify-between px-5 border-b border-slate-200 shrink-0">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-emerald-600 flex items-center justify-center">
+              <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2} className="w-4 h-4">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+              </svg>
+            </div>
+            <h1 className="text-base font-semibold text-slate-800">Chat LMS</h1>
+          </div>
           <div className="flex items-center gap-2">
             {role === "teacher" && (
               <button
                 onClick={() => setModalOpen(true)}
-                className="w-8 h-8 flex items-center justify-center rounded-full bg-green-600 text-white hover:bg-green-700 transition-colors"
+                className="w-8 h-8 flex items-center justify-center rounded-xl bg-emerald-600 text-white hover:bg-emerald-700 transition-colors shadow-sm"
                 title="Create Room"
               >
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className="w-4 h-4">
@@ -60,27 +67,33 @@ export default function RoomList({
             )}
             <button
               onClick={onLogout}
-              className="text-xs text-gray-500 hover:text-red-600 bg-gray-200 hover:bg-red-50 rounded-full px-3 py-1 transition-colors"
+              className="text-xs text-slate-400 hover:text-red-500 bg-white hover:bg-red-50 rounded-lg px-2.5 py-1.5 transition-colors border border-slate-200 shadow-sm"
             >
               Log Out
             </button>
           </div>
         </div>
 
-        {/* Search (placeholder) */}
-        <div className="px-3 py-2 bg-gray-50 border-b border-gray-200">
-          <input
-            type="text"
-            placeholder="Search or start new chat"
-            className="w-full text-sm px-3 py-1.5 rounded-lg bg-white border border-gray-200 outline-none focus:border-green-400 focus:ring-1 focus:ring-green-400 transition-colors"
-            readOnly
-          />
+        {/* Search */}
+        <div className="px-4 py-3">
+          <div className="relative">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2">
+              <circle cx="11" cy="11" r="8" />
+              <path d="m21 21-4.35-4.35" />
+            </svg>
+            <input
+              type="text"
+              placeholder="Search conversations..."
+              className="w-full text-sm pl-9 pr-3 py-2 rounded-xl bg-white border border-slate-200 shadow-sm outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 transition-colors text-slate-700 placeholder:text-slate-400"
+              readOnly
+            />
+          </div>
         </div>
 
         {/* Room list */}
-        <ul className="flex-1 overflow-y-auto">
+        <ul className="flex-1 overflow-y-auto px-3 space-y-1">
           {rooms.length === 0 && (
-            <li className="px-4 py-8 text-center text-sm text-gray-400">
+            <li className="px-3 py-8 text-center text-sm text-slate-400">
               {role === "teacher"
                 ? "No rooms yet. Click + to create one."
                 : "No rooms yet. Ask your teacher to add you."}
@@ -92,29 +105,41 @@ export default function RoomList({
               <li key={room.id}>
                 <button
                   onClick={() => onSelectRoom(room.id)}
-                  className={`w-full flex items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-gray-50 ${
-                    active ? "bg-gray-100" : ""
+                  className={`w-full flex items-center gap-3 px-3 py-3 text-left rounded-xl transition-all ${
+                    active
+                      ? "bg-white text-emerald-700 shadow-sm ring-1 ring-slate-200"
+                      : "hover:bg-slate-100 text-slate-700"
                   }`}
                 >
                   {/* Avatar circle */}
-                  <div className="w-12 h-12 shrink-0 rounded-full bg-green-600 flex items-center justify-center text-white text-xs font-bold">
+                  <div
+                    className={`w-11 h-11 shrink-0 rounded-xl flex items-center justify-center text-xs font-bold ${
+                      active
+                        ? "bg-emerald-600 text-white"
+                        : "bg-slate-200 text-slate-600"
+                    }`}
+                  >
                     {roomTypeIcon[room.type]}
                   </div>
 
                   {/* Room info */}
-                  <div className="flex-1 min-w-0 border-b border-gray-100 pb-3">
+                  <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
-                      <span className="font-medium text-gray-900 truncate text-sm">
+                      <span
+                        className={`font-medium truncate text-sm ${
+                          active ? "text-slate-900" : "text-slate-700"
+                        }`}
+                      >
                         {room.name}
                       </span>
                       {room.last_message_at && (
-                        <span className="text-xs text-gray-400 shrink-0 ml-2">
+                        <span className="text-[11px] text-slate-400 shrink-0 ml-2">
                           {timeAgo(room.last_message_at)}
                         </span>
                       )}
                     </div>
                     {room.last_message && (
-                      <p className="text-sm text-gray-500 truncate mt-0.5">
+                      <p className="text-xs text-slate-400 truncate mt-0.5">
                         {room.last_message}
                       </p>
                     )}

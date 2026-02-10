@@ -8,10 +8,11 @@ export async function sendMessage(
   metadata: Record<string, unknown> = {}
 ): Promise<MessageRow | null> {
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    data: { session },
+  } = await supabase.auth.getSession();
 
-  if (!user) throw new Error("Not authenticated");
+  if (!session?.user) throw new Error("Not authenticated");
+  const user = session.user;
 
   const { data, error } = await supabase
     .from("messages")
