@@ -11,6 +11,7 @@ interface MessageInputProps {
     description: string;
     max_score: number;
     due_date: string;
+    file_url?: string;
   }) => void;
   role: UserRole;
 }

@@ -7,6 +7,7 @@ import AddMemberModal from "./AddMemberModal";
 interface ChatHeaderProps {
   room: Room;
   role: UserRole;
+  onToggleClasswork: () => void;
 }
 
 const roomTypeLabel: Record<Room["type"], string> = {
@@ -15,7 +16,7 @@ const roomTypeLabel: Record<Room["type"], string> = {
   announcement: "Announcements",
 };
 
-export default function ChatHeader({ room, role }: ChatHeaderProps) {
+export default function ChatHeader({ room, role, onToggleClasswork }: ChatHeaderProps) {
   const [modalOpen, setModalOpen] = useState(false);
 
   return (
@@ -33,20 +34,33 @@ export default function ChatHeader({ room, role }: ChatHeaderProps) {
           </div>
         </div>
 
-        {role === "teacher" && (
+        <div className="flex items-center gap-2 shrink-0">
           <button
-            onClick={() => setModalOpen(true)}
-            className="flex items-center gap-1.5 text-xs font-medium text-gray-600 hover:text-green-700 bg-gray-200 hover:bg-green-50 rounded-full px-3 py-1.5 transition-colors shrink-0"
+            onClick={onToggleClasswork}
+            className="flex items-center gap-1.5 text-xs font-medium text-gray-600 hover:text-green-700 bg-gray-200 hover:bg-green-50 rounded-full px-3 py-1.5 transition-colors"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-3.5 h-3.5">
-              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
-              <circle cx="9" cy="7" r="4" />
-              <line x1="19" y1="8" x2="19" y2="14" />
-              <line x1="22" y1="11" x2="16" y2="11" />
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
             </svg>
-            Add Member
+            Classwork
           </button>
-        )}
+
+          {role === "teacher" && (
+            <button
+              onClick={() => setModalOpen(true)}
+              className="flex items-center gap-1.5 text-xs font-medium text-gray-600 hover:text-green-700 bg-gray-200 hover:bg-green-50 rounded-full px-3 py-1.5 transition-colors"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-3.5 h-3.5">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <line x1="19" y1="8" x2="19" y2="14" />
+                <line x1="22" y1="11" x2="16" y2="11" />
+              </svg>
+              Add Member
+            </button>
+          )}
+        </div>
       </div>
 
       <AddMemberModal

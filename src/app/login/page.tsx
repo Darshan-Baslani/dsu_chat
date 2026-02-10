@@ -22,19 +22,26 @@ export default function LoginPage() {
     setError(null);
     setLoading(true);
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    if (error) {
-      setError(error.message);
+      if (error) {
+        setError(error.message);
+        setLoading(false);
+        return;
+      }
+
+      router.refresh();
+      router.push("/");
+    } catch (err) {
+      setError(
+        err instanceof Error ? `Network error: ${err.message}` : "Network error — check your connection"
+      );
       setLoading(false);
-      return;
     }
-
-    router.refresh();
-    router.push("/");
   }
 
   async function handleSignUp(e: FormEvent) {
@@ -48,25 +55,32 @@ export default function LoginPage() {
 
     setLoading(true);
 
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: fullName.trim(),
-          role,
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: fullName.trim(),
+            role,
+          },
         },
-      },
-    });
+      });
 
-    if (error) {
-      setError(error.message);
+      if (error) {
+        setError(error.message);
+        setLoading(false);
+        return;
+      }
+
+      router.refresh();
+      router.push("/");
+    } catch (err) {
+      setError(
+        err instanceof Error ? `Network error: ${err.message}` : "Network error — check your connection"
+      );
       setLoading(false);
-      return;
     }
-
-    router.refresh();
-    router.push("/");
   }
 
   return (

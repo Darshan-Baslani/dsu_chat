@@ -1,12 +1,14 @@
 "use client";
 
 import { useState, FormEvent, useEffect, useRef } from "react";
+import { supabase } from "@/lib/supabase";
 
 interface AssignmentData {
   title: string;
   description: string;
   max_score: number;
   due_date: string;
+  file_url?: string;
 }
 
 interface CreateAssignmentModalProps {
@@ -24,6 +26,9 @@ export default function CreateAssignmentModal({
   const [description, setDescription] = useState("");
   const [maxScore, setMaxScore] = useState(100);
   const [dueDate, setDueDate] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const titleRef = useRef<HTMLInputElement>(null);
 
   // Focus title input when modal opens
@@ -46,19 +51,55 @@ export default function CreateAssignmentModal({
     setDescription("");
     setMaxScore(100);
     setDueDate("");
+    setFile(null);
+    setError(null);
   }
 
-  function handleSubmit(e: FormEvent) {
+  async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     if (!title.trim() || !dueDate) return;
-    onSubmit({
-      title: title.trim(),
-      description: description.trim(),
-      max_score: maxScore,
-      due_date: new Date(dueDate).toISOString(),
-    });
-    reset();
-    onClose();
+
+    setUploading(true);
+    setError(null);
+
+    try {
+      let file_url: string | undefined;
+
+      if (file) {
+        const path = `assignments/${Date.now()}_${file.name}`;
+        const { data: uploadData, error: uploadErr } = await supabase.storage
+          .from("lms-files")
+          .upload(path, file);
+
+        if (uploadErr) {
+          console.error("Storage upload error:", uploadErr);
+          throw new Error(`Upload failed: ${uploadErr.message}`);
+        }
+
+        console.log("Upload success:", uploadData);
+
+        const { data: urlData } = supabase.storage
+          .from("lms-files")
+          .getPublicUrl(path);
+        file_url = urlData.publicUrl;
+      }
+
+      onSubmit({
+        title: title.trim(),
+        description: description.trim(),
+        max_score: maxScore,
+        due_date: new Date(dueDate).toISOString(),
+        ...(file_url && { file_url }),
+      });
+      reset();
+      onClose();
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error("CreateAssignment error:", err);
+      setError(msg);
+    } finally {
+      setUploading(false);
+    }
   }
 
   if (!open) return null;
@@ -148,6 +189,42 @@ export default function CreateAssignmentModal({
             </div>
           </div>
 
+          {/* File Attachment */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Attachment <span className="text-gray-400 font-normal">(optional)</span>
+            </label>
+            <label className="flex items-center gap-2 w-full rounded-lg border border-dashed border-gray-300 px-3 py-2.5 text-sm cursor-pointer hover:border-green-400 hover:bg-green-50/50 transition-colors">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4 text-gray-400 shrink-0">
+                <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
+              </svg>
+              <span className="truncate text-gray-500">
+                {file ? file.name : "Choose a file..."}
+              </span>
+              <input
+                type="file"
+                className="hidden"
+                onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+              />
+            </label>
+            {file && (
+              <button
+                type="button"
+                onClick={() => setFile(null)}
+                className="mt-1 text-xs text-red-500 hover:text-red-700"
+              >
+                Remove file
+              </button>
+            )}
+          </div>
+
+          {/* Error */}
+          {error && (
+            <p className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">
+              {error}
+            </p>
+          )}
+
           {/* Actions */}
           <div className="flex justify-end gap-2 pt-2">
             <button
@@ -159,10 +236,10 @@ export default function CreateAssignmentModal({
             </button>
             <button
               type="submit"
-              disabled={!title.trim() || !dueDate}
+              disabled={!title.trim() || !dueDate || uploading}
               className="px-5 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-40"
             >
-              Post
+              {uploading ? "Uploading..." : "Post"}
             </button>
           </div>
         </form>

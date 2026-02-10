@@ -72,6 +72,23 @@ function AssignmentCard({
           )}
         </div>
 
+        {/* Attachment download */}
+        {typeof metadata.file_url === "string" && metadata.file_url && (
+          <a
+            href={metadata.file_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`mt-1.5 inline-flex items-center gap-1.5 text-xs font-medium rounded-md px-2.5 py-1.5 transition-colors ${
+              isMine
+                ? "bg-green-800/40 text-green-100 hover:bg-green-800/60"
+                : "bg-green-50 text-green-700 hover:bg-green-100"
+            }`}
+          >
+            <span>📎</span>
+            Download Attachment
+          </a>
+        )}
+
         {/* Submit button for students */}
         {role === "student" && !isMine && (
           <button
@@ -136,6 +153,22 @@ function SubmissionCard({
       )}
       {comment && (
         <p className="opacity-80 italic">{comment}</p>
+      )}
+      {/* File download */}
+      {typeof metadata.file_url === "string" && metadata.file_url && (
+        <a
+          href={metadata.file_url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`mt-1 inline-flex items-center gap-1.5 text-xs font-medium rounded-md px-2.5 py-1.5 transition-colors ${
+            isMine
+              ? "bg-green-800/40 text-green-100 hover:bg-green-800/60"
+              : "bg-emerald-100 text-emerald-700 hover:bg-emerald-200"
+          }`}
+        >
+          <span>📎</span>
+          Download Attachment
+        </a>
       )}
     </div>
   );

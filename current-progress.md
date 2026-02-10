@@ -33,14 +33,15 @@ src/
 ├── components/chat/
 │   ├── ChatLayout.tsx          # Top-level shell: sidebar + main chat area, state management
 │   ├── RoomList.tsx            # Left sidebar — room list, create room button (teachers), logout
-│   ├── ChatHeader.tsx          # Active room header bar (name, type badge, add member button)
+│   ├── ChatHeader.tsx          # Active room header bar (name, type badge, classwork + add member buttons)
 │   ├── MessageList.tsx         # Scrollable message feed with date dividers + auto-scroll
 │   ├── MessageBubble.tsx       # Individual bubble — text, AssignmentCard, SubmissionCard
 │   ├── MessageInput.tsx        # Bottom input bar + "+" button for teachers to create assignments
 │   ├── CreateRoomModal.tsx     # Modal for creating rooms (name, type: group/announcement)
 │   ├── AddMemberModal.tsx      # Modal for adding students to rooms by email lookup
 │   ├── CreateAssignmentModal.tsx # Modal for assignments (title, desc, score, due date)
-│   └── SubmitAssignmentModal.tsx # Modal for student submissions (link + comments)
+│   ├── SubmitAssignmentModal.tsx # Modal for student submissions (link + comments)
+│   └── ClassworkSidebar.tsx     # Slide-in sidebar listing all assignments + submission counts
 ├── hooks/
 │   ├── use-chat.ts             # useChat(roomId) — fetch messages + Realtime subscription + addMessage
 │   ├── use-rooms.ts            # useRooms() — fetch rooms user belongs to
@@ -161,7 +162,26 @@ supabase/
 3. Message inserted with `message_type = 'submission'` and metadata referencing the assignment
 4. SubmissionCard renders with distinct emerald styling
 
-### 6. UI/UX
+### 6. Classwork Sidebar
+
+| Feature | Status | Details |
+| ------- | ------ | ------- |
+| Toggle Button | ✅ Working | "Classwork" button in ChatHeader (visible to all roles) |
+| Slide-in Panel | ✅ Working | Fixed panel slides in from right with smooth CSS transition |
+| Assignment List | ✅ Working | Filters room messages for `message_type = 'assignment'`, renders as cards |
+| Card Display | ✅ Working | Each card shows title, description, due date, max score, posted by |
+| Submission Count | ✅ Working | Counts submissions per assignment via `metadata.ref_assignment_id` match |
+| Empty State | ✅ Working | Shows placeholder when no assignments exist |
+| Mobile Backdrop | ✅ Working | Semi-transparent overlay on small screens, click to close |
+
+**Classwork Flow:**
+1. User clicks "Classwork" button in ChatHeader → sidebar slides in from right
+2. Component filters current room's messages client-side (no extra queries)
+3. Assignment cards rendered with metadata (title, due date, max score)
+4. Submission count badge shown per assignment by matching `ref_assignment_id`
+5. Click "X" or backdrop to close
+
+### 7. UI/UX
 
 | Feature | Status | Details |
 | ------- | ------ | ------- |
@@ -229,6 +249,7 @@ supabase/
 4. **Empty roomId UUID error** — `useChat("")` fired a query with empty string for UUID column. Fixed with early return guard.
 5. **Email rate limit on signup** — Disabled email confirmation in Supabase dashboard.
 6. **Messages not updating after send** — Added optimistic updates via `addMessage()` callback from `useChat` hook.
+7. **Middleware crash on Supabase fetch failure** — Edge Runtime `getUser()` call would crash with `Error: fetch failed`. Fixed by wrapping in try-catch and falling through to client-side auth.
 
 ## Known Issues
 
@@ -259,6 +280,8 @@ supabase/
 - [x] Date dividers, auto-scroll, sender name display
 - [x] Loading, empty, and error states throughout UI
 - [x] Database triggers for auto profile creation and timestamp updates
+- [x] Classwork sidebar — slide-in panel with assignment cards + submission counts
+- [x] Middleware resilience — try-catch around `getUser()` to handle Supabase fetch failures gracefully
 
 ## What's Not Done Yet
 

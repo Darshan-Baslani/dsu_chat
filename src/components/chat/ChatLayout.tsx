@@ -13,12 +13,14 @@ import RoomList from "./RoomList";
 import ChatHeader from "./ChatHeader";
 import MessageList from "./MessageList";
 import MessageInput from "./MessageInput";
+import ClassworkSidebar from "./ClassworkSidebar";
 
 export default function ChatLayout() {
   const router = useRouter();
   const { user, loading: userLoading } = useCurrentUser();
   const { rooms, loading: roomsLoading, refresh: refreshRooms } = useRooms();
   const [activeRoomId, setActiveRoomId] = useState<string | null>(null);
+  const [classworkOpen, setClassworkOpen] = useState(false);
 
   const effectiveRoomId = activeRoomId ?? rooms[0]?.id ?? "";
   const { messages, loading: messagesLoading, addMessage } = useChat(effectiveRoomId);
@@ -46,6 +48,7 @@ export default function ChatLayout() {
     description: string;
     max_score: number;
     due_date: string;
+    file_url?: string;
   }) {
     if (!effectiveRoomId) return;
     try {
@@ -58,6 +61,7 @@ export default function ChatLayout() {
           description: data.description,
           max_score: data.max_score,
           due_date: data.due_date,
+          ...(data.file_url && { file_url: data.file_url }),
         }
       );
     } catch (err) {
@@ -97,7 +101,11 @@ export default function ChatLayout() {
       <main className="flex flex-col flex-1 min-w-0">
         {activeRoom ? (
           <>
-            <ChatHeader room={activeRoom} role={role} />
+            <ChatHeader
+              room={activeRoom}
+              role={role}
+              onToggleClasswork={() => setClassworkOpen((o) => !o)}
+            />
             <MessageList
               messages={messages}
               roomType={activeRoom.type}
@@ -122,6 +130,14 @@ export default function ChatLayout() {
           </div>
         )}
       </main>
+
+      <ClassworkSidebar
+        open={classworkOpen}
+        onClose={() => setClassworkOpen(false)}
+        messages={messages}
+        role={role}
+        roomId={effectiveRoomId}
+      />
     </div>
   );
 }
